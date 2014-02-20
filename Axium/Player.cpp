@@ -23,12 +23,12 @@ public:
 
 
 //Looking for a way to make this work on a Mac, but just causes errors for now.
-
+/*
 void Player::setName(std::string name)
 {
     this->name = name;
 }
-/*
+
 std::string Player::getName()
 {
     return this->name;
