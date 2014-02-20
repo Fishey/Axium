@@ -5,10 +5,9 @@
 //  Created by Randy on 17/02/14.
 //  Copyright (c) 2014 Randy. All rights reserved.
 //
-
-#include <iostream>
 #include "includes.h"
 void initStory();
+Player me = *new Player();
 
 int main(int argc, const char * argv[])
 {
@@ -28,5 +27,7 @@ void initStory()
     std::cin >> name;
     me.setName(name);
     
-    std::cout << "Welcome, brave adventurer " + me.getName() + ".";
+    std::cout << "Welcome, brave adventurer " + me.getName() + ".\n";
+    if (me.getKarma() > 50)
+        std::cout << "You are a good person!";
 }

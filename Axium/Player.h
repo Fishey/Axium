@@ -10,5 +10,5 @@
 #define __Axium__Player__
 
 #include <iostream>
-
+enum gender {male, female};
 #endif /* defined(__Axium__Player__) */
