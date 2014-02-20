@@ -18,7 +18,7 @@ public:
     std::string getName() {return this->name;};
     std::string getType() {return this->type;};
     int getKarma() {return this->karma;};
-    void setName(std::string name);
+    void setName(std::string name) {this->name = name;};
 };
 
 
