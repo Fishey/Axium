@@ -43,9 +43,9 @@ class Monster : public Entity
 private:
     int itemLevel;
 public:
-    Monster(std::string name, int hitpoints, int defense, int attack)
+    Monster(std::string name, int hitpoints, int defense, int attack, int ilvl)
     {
-        this->name = name; this->hitpoints = hitpoints; this->defense = defense; this->attack = attack;
+        this->name = name; this->hitpoints = hitpoints; this->defense = defense; this->attack = attack; this->itemLevel = ilvl;
     }
     int getItemLevel() {return itemLevel;}
     

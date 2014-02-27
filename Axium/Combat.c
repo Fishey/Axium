@@ -16,7 +16,7 @@ void itemDrop(Monster enemy, Player me)
     int rollem = arc4random() % 100 + 1;
     if (rollem > 95)
     {
-        std::string output = "You are very lucky! The " + enemy.getName() + " dropped a scroll that will permanently increase your Attack power by" + intToString(enemy.getItemLevel()) + ".";
+        std::string output = "You are very lucky! The " + enemy.getName() + " dropped a scroll that will permanently increase your Attack power by " + intToString(enemy.getItemLevel()) + ".";
         sayWait(output);
         me.increaseAttack(enemy.getItemLevel());
         output = "Your new Attack level is: " + intToString(me.getAttack()) + ".";
@@ -26,6 +26,7 @@ void itemDrop(Monster enemy, Player me)
     else if (rollem > 90)
     {
         std::string output = "Fortune smiles upon you! The " + enemy.getName() + " dropped a rare material that will permanently increase your Defensive power by" + intToString(enemy.getItemLevel()) + ".";
+        sayWait(output);
         me.increaseDefense(enemy.getItemLevel());
         output = "Your new Defence level is: " + intToString(me.getAttack()) + ".";
         sayWait(output);

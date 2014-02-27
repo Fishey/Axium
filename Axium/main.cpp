@@ -7,7 +7,7 @@
 //
 #include "Combat.c"
 Player me;
-Monster zubat("Zubat", 15,5,5);
+Monster zubat("Zubat", 15,5,5,1);
 
 void initStory()
 {
