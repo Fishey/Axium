@@ -17,22 +17,29 @@ void initStory()
     {
         clearScreen(); // Clear the screen.
         int option;
-        std::cout << "What would you like to do? Enter the number for the option you would like. \n1. Fight - 2. Exit - 3. Check items.\n";
-        std::cin >> option;
-        switch (option) {
+        std::cout << "What would you like to do? Enter the number for the option you would like. \n1. Fight - 2. Check items. - 9. Exit\n"; // Ask the user for input.
+        std::cin >> option; // Wait for input.
+        switch (option) { // Use input to determine what to do next.
             case 1:
             {
-                Monster zubat("Zubat", 15,5,5,1, 90, "Bat tooth");
+                Item batTooth("Bat tooth"); // Create an item to be dropped by the Zubat.
+                Monster zubat("Zubat", 15,5,5,1, 90, batTooth); // Create the Zubat for the player to fight.
                 sayWait("A bat pops up out of nowhere and decides to get fresh with you!"); // Say a line of text and wait for the user to press the Enter key.
                 Combat(zubat, me); // Start a fight with a predetermined opponent.
                 break;
             }
             case 2:
-                sayWait("Goodbye!");
-                running = false;
+                me.showItems();
                 break;
             case 3:
-                me.showItems();
+            {
+                Item Excalibur("Excalibur", 10, attackType);
+                me.acquireItem(Excalibur);
+                break;
+            }
+            case 9:
+                sayWait("Goodbye!");
+                running = false;
                 break;
             default:
                 break;

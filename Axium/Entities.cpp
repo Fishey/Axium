@@ -7,6 +7,7 @@
 //
 
 #include "Entities.h"
+#include "Items.cpp"
 #include "includes.h"
 
 class Entity
@@ -14,7 +15,7 @@ class Entity
 protected:
     gender genderType;
     std::string name, type;
-    std::vector<std::string> items;
+    std::vector<Item> items;
     int karma = arc4random() % 100 + 1, hitpoints, defense, attack, maxhp;
 public:
     std::string getName() {return this->name;}
@@ -22,9 +23,39 @@ public:
     std::string getGender() {if(this->genderType == male) return "male"; else if (this->genderType == female) return "female"; else return "unknown";}
     gender getGenderType() {return this->genderType;}
     int getKarma() {return this->karma;}
-    int getAttack() {return this->attack;}
+    int getAttack() {
+        if (items.empty())
+        {
+        return this->attack;
+        }
+        else
+        {
+            int tempAttack = this->attack;
+            for (Item &item : this->items)
+            {
+                if (item.getType() == attackType)
+                    tempAttack += item.getLevel();
+            }
+            return tempAttack;
+        }
+    }
     int getHealth() {return this->hitpoints;}
-    int getDefense() {return this->defense;}
+    int getDefense() {
+        if (items.empty())
+        {
+            return this->defense;
+        }
+        else
+        {
+            int tempDefense = this->defense;
+            for (Item &item : this->items)
+            {
+                if (item.getType() == attackType)
+                    tempDefense += item.getLevel();
+            }
+            return tempDefense;
+        }
+    }
     void setName(std::string name) {this->name = name;}
     void setAttack(int attack) {this->attack = attack;}
     void setDefense(int defense) {this->defense = defense;}
@@ -43,16 +74,18 @@ public:
 class Monster : public Entity
 {
 private:
-    int itemLevel, dropRate;
-    std::string droppedItem;
+    int mobLevel, dropRate;
+    Item droppedItem;
 public:
-    Monster(std::string name, int hitpoints, int defense, int attack, int ilvl, int dropRate, std::string droppedItem)
+    Monster(std::string name, int hitpoints, int defense, int attack, int mobLevel, int dropRate, Item droppedItem)
     {
-        this->name = name; this->hitpoints = hitpoints; this->defense = defense; this->attack = attack; this->itemLevel = ilvl; this->droppedItem = droppedItem; this->dropRate = dropRate;
+        this->name = name; this->hitpoints = hitpoints; this->defense = defense; this->attack = attack; this->mobLevel = mobLevel; this->droppedItem = droppedItem; this->dropRate = dropRate;
     }
-    int getItemLevel() {return itemLevel;}
+    int getMobLevel() {return mobLevel;}
+    int getItemLevel() {return droppedItem.getLevel();}
     int getDropRate() {return dropRate;}
-    std::string getDroppedItem() {return droppedItem;}
+    Item getDroppedItem() {return droppedItem;}
+    std::string getDroppedItemName() {return droppedItem.getName();}
     
 };
 
@@ -64,14 +97,14 @@ public:
         this->attack = 10; this->defense = 0; this->hitpoints = 100; this->maxhp = 100;
     }
     
-    void acquireItem(std::string item) {this->items.push_back(item);}
+    void acquireItem(Item item) {this->items.push_back(item);}
     void showItems()
     {
         int i = 0;
-        for (std::string& item : this->items)
+        for (Item &item : this->items)
         {
             i++;
-            std::cout << "Item # " + intToString(i) + " : " + item + "\n";
+            std::cout << "Item # " + intToString(i) + " : " + item.getName() + "\n";
         }
         sayWait("");
         std::cin.ignore(1);
