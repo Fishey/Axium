@@ -25,7 +25,7 @@ void initStory()
                 Item batTooth("Bat tooth"); // Create an item to be dropped by the Zubat.
                 Monster zubat("Zubat", 15,5,5,1, 90, batTooth); // Create the Zubat for the player to fight.
                 sayWait("A bat pops up out of nowhere and decides to get fresh with you!"); // Say a line of text and wait for the user to press the Enter key.
-                Combat(zubat, me); // Start a fight with a predetermined opponent.
+                running = Combat(zubat, me); // Start a fight with a predetermined opponent.
                 break;
             }
             case 2:
