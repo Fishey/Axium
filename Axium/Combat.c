@@ -6,34 +6,40 @@
 //  Copyright (c) 2014 Randy. All rights reserved.
 //
 
-#include <stdio.h>
 #include "Entities.cpp"
 #include "includes.h"
 int damage;
 
-void itemDrop(Monster enemy, Player me)
+void itemDrop(Monster &enemy, Player &me)
 {
+    int dropRate = 100 - enemy.getDropRate();
     int rollem = arc4random() % 100 + 1;
-    if (rollem > 95)
-    {
-        std::string output = "You are very lucky! The " + enemy.getName() + " dropped a scroll that will permanently increase your Attack power by " + intToString(enemy.getItemLevel()) + ".";
-        sayWait(output);
-        me.increaseAttack(enemy.getItemLevel());
-        output = "Your new Attack level is: " + intToString(me.getAttack()) + ".";
-        sayWait(output);
-    }
     
-    else if (rollem > 90)
+    if (rollem > dropRate)
     {
-        std::string output = "Fortune smiles upon you! The " + enemy.getName() + " dropped a rare material that will permanently increase your Defensive power by" + intToString(enemy.getItemLevel()) + ".";
-        sayWait(output);
-        me.increaseDefense(enemy.getItemLevel());
-        output = "Your new Defence level is: " + intToString(me.getAttack()) + ".";
-        sayWait(output);
+        if (rollem > 95)
+        {
+            std::string output = "You are very lucky! The " + enemy.getName() + " dropped a scroll that will permanently increase your Attack power by " + intToString(enemy.getItemLevel()) + ".";
+            sayWait(output);
+            me.increaseAttack(enemy.getItemLevel());
+            output = "Your new Attack level is: " + intToString(me.getAttack()) + ".";
+            sayWait(output);
+        }
+        
+        else if (rollem > 90)
+        {
+            std::string output = "Fortune smiles upon you! The " + enemy.getName() + " dropped a rare material that will permanently increase your Defensive power by" + intToString(enemy.getItemLevel()) + ".";
+            sayWait(output);
+            me.increaseDefense(enemy.getItemLevel());
+            output = "Your new Defence level is: " + intToString(me.getDefense()) + ".";
+            sayWait(output);
+        }
+        sayWait("You also acquired a " + enemy.getDroppedItem() + ".");
+        me.acquireItem(enemy.getDroppedItem());
     }
 }
 
-void Combat(Monster enemy, Player me)
+void Combat(Monster &enemy, Player &me)
 {
     do
     {
@@ -58,7 +64,7 @@ void Combat(Monster enemy, Player me)
     
     else if (enemy.getHealth() <= 0 && me.getHealth() > 0)
     {
-        std::cout << "Congratulations. You have beaten the " + enemy.getName() + ".";
+        sayWait("Congratulations. You have beaten the " + enemy.getName() + ".");
         itemDrop(enemy, me);
     }
     

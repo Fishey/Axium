@@ -10,6 +10,7 @@
 #define Axium_includes
 #include <iostream>
 #include <sstream>
+#include <vector>
 
 std::string intToString(int i)
 {

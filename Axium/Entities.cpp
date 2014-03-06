@@ -8,11 +8,13 @@
 
 #include "Entities.h"
 #include "includes.h"
+
 class Entity
 {
 protected:
     gender genderType;
     std::string name, type;
+    std::vector<std::string> items;
     int karma = arc4random() % 100 + 1, hitpoints, defense, attack, maxhp;
 public:
     std::string getName() {return this->name;}
@@ -41,21 +43,37 @@ public:
 class Monster : public Entity
 {
 private:
-    int itemLevel;
+    int itemLevel, dropRate;
+    std::string droppedItem;
 public:
-    Monster(std::string name, int hitpoints, int defense, int attack, int ilvl)
+    Monster(std::string name, int hitpoints, int defense, int attack, int ilvl, int dropRate, std::string droppedItem)
     {
-        this->name = name; this->hitpoints = hitpoints; this->defense = defense; this->attack = attack; this->itemLevel = ilvl;
+        this->name = name; this->hitpoints = hitpoints; this->defense = defense; this->attack = attack; this->itemLevel = ilvl; this->droppedItem = droppedItem; this->dropRate = dropRate;
     }
     int getItemLevel() {return itemLevel;}
+    int getDropRate() {return dropRate;}
+    std::string getDroppedItem() {return droppedItem;}
     
 };
 
 class Player : public Entity
 {
-public: 
+public:
     Player()
     {
         this->attack = 10; this->defense = 0; this->hitpoints = 100; this->maxhp = 100;
+    }
+    
+    void acquireItem(std::string item) {this->items.push_back(item);}
+    void showItems()
+    {
+        int i = 0;
+        for (std::string& item : this->items)
+        {
+            i++;
+            std::cout << "Item # " + intToString(i) + " : " + item + "\n";
+        }
+        sayWait("");
+        std::cin.ignore(1);
     }
 };
