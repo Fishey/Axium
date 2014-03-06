@@ -19,6 +19,12 @@ void initStory()
         int option;
         std::cout << "What would you like to do? Enter the number for the option you would like. \n1. Fight - 2. Check items. - 9. Exit\n"; // Ask the user for input.
         std::cin >> option; // Wait for input.
+        if (std::cin.fail())
+        {
+            std::cout <<"Fuck you for trying to fuck with my code. Dick.";
+            running = false;
+        }
+        else {
         switch (option) { // Use input to determine what to do next.
             case 1:
             {
@@ -33,8 +39,16 @@ void initStory()
                 break;
             case 3:
             {
+                if (!me.hasItem("Excalibur"))
+                {
                 Item Excalibur("Excalibur", 10, attackType);
                 me.acquireItem(Excalibur);
+                }
+                else
+                {
+                    std::cout << "Foolish mortal! You already own the legendary sword Excalibur. Why would you need another?\nPress enter to continue . . .";
+                    std::cin.ignore(2);
+                }
                 break;
             }
             case 9:
@@ -43,6 +57,7 @@ void initStory()
                 break;
             default:
                 break;
+        }
         }
     }
 }

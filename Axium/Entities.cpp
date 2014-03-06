@@ -56,6 +56,15 @@ public:
             return tempDefense;
         }
     }
+    std::vector<std::string> itemList()
+    {
+        std::vector<std::string> allItems;
+        for (Item &item : this->items)
+        {
+            allItems.push_back(item.getName());
+        }
+        return allItems;
+    }
     void setName(std::string name) {this->name = name;}
     void setAttack(int attack) {this->attack = attack;}
     void setDefense(int defense) {this->defense = defense;}
@@ -69,6 +78,13 @@ public:
     void increaseAttack (int attack) {this-> attack += attack;}
     void increaseMaxHp (int hp) {this-> maxhp += hp; this->hitpoints += hp;}
     void increaseHp (int hp) {this->hitpoints += hp;}
+    bool hasItem(std::string itemName)
+    {
+        std::vector<std::string> itemNames = itemList();
+        if (std::find(itemNames.begin(), itemNames.end(), itemName) != itemNames.end())
+        return true;
+        else return false;
+    }
 };
 
 class Monster : public Entity

@@ -50,10 +50,13 @@ bool Combat(Monster &enemy, Player &me)
         std::cout << "The enemy's defense: " + intToString(enemy.getDefense()) + ".\n";
         std::cout << "You attack the " + enemy.getName() + ".\n";
         enemy.takeDamage(me.getAttack());
+        if (enemy.getHealth() <= 0)
+            break;
         std::cout << "The " + enemy.getName() + " retaliates with an attack.\n";
         me.takeDamage(enemy.getAttack());
-        if (me.getHealth() <= 0 || enemy.getHealth() <= 0)
+        if (me.getHealth() <= 0)
             break;
+        
     }
     while (enemy.getHealth() > 0 && me.getHealth() > 0);
     
