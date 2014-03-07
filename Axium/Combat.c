@@ -28,7 +28,7 @@ void itemDrop(Monster &enemy, Player &me)
         
         else if (rollem > 90)
         {
-            std::string output = "Fortune smiles upon you! The " + enemy.getName() + " dropped a rare material that will permanently increase your Defensive power by" + intToString(enemy.getMobLevel()) + ".";
+            std::string output = "Fortune smiles upon you! The " + enemy.getName() + " dropped a rare material that will permanently increase your Defensive power by " + intToString(enemy.getMobLevel()) + ".";
             sayWait(output);
             me.increaseDefense(enemy.getMobLevel());
             output = "Your new Defence level is: " + intToString(me.getDefense()) + ".";

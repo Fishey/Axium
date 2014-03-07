@@ -15,7 +15,8 @@ class Item
 {
     itemType itemKind;
     std::string name;
-    int itemLevel;
+    int itemLevel, quantity;
+    bool stackable = false;;
     
 public:
     Item()
@@ -27,6 +28,10 @@ public:
     {
         this->itemLevel = 0;
         this->name = name;
+    }
+    Item(std::string name, bool stackable)
+    {
+        this->stackable = stackable;
     }
     Item(std::string name, int iLVL)
     {
@@ -43,4 +48,5 @@ public:
     itemType getType() {return this->itemKind;}
     std::string getName() {return this->name;}
     int getLevel() {return this->itemLevel;}
+    int getQuantity() {return this->quantity;}
     };

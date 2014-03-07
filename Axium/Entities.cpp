@@ -77,7 +77,10 @@ public:
     void increaseDefense (int defense) {this->defense += defense;}
     void increaseAttack (int attack) {this-> attack += attack;}
     void increaseMaxHp (int hp) {this-> maxhp += hp; this->hitpoints += hp;}
-    void increaseHp (int hp) {this->hitpoints += hp;}
+    void increaseHp (int hp) {
+        if (this->hitpoints + hp < maxhp) this->hitpoints += hp;
+        else this->hitpoints = maxhp;
+    }
     bool hasItem(std::string itemName)
     {
         std::vector<std::string> itemNames = itemList();
@@ -85,6 +88,14 @@ public:
         return true;
         else return false;
     }
+    
+   /* Item findItem(std::string itemName)
+    {
+       if (std::find(itemList().begin(), itemList().end(), itemName) != itemList().end())
+       {
+           return itemList().end();
+       }
+    } */ // WIP
 };
 
 class Monster : public Entity
@@ -113,14 +124,23 @@ public:
         this->attack = 10; this->defense = 0; this->hitpoints = 100; this->maxhp = 100;
     }
     
-    void acquireItem(Item item) {this->items.push_back(item);}
+    void acquireItem(Item item) {
+        if (!hasItem(item.getName()))
+        this->items.push_back(item);
+        else
+        {
+            //lookup item
+            //add 1 to item quantity
+            //WIP
+        }
+    }
     void showItems()
     {
         int i = 0;
         for (Item &item : this->items)
         {
             i++;
-            std::cout << "Item # " + intToString(i) + " : " + item.getName() + "\n";
+            std::cout << intToString(item.getQuantity()) + " of " "Item # " + intToString(i) + " : " + item.getName() + "\n";
         }
         sayWait("");
         std::cin.ignore(1);
