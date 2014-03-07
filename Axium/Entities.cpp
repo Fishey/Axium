@@ -89,13 +89,12 @@ public:
         else return false;
     }
     
-   /* Item findItem(std::string itemName)
+   Item findItem(Item searchItem)
     {
-       if (std::find(itemList().begin(), itemList().end(), itemName) != itemList().end())
-       {
-           return itemList().end();
-       }
-    } */ // WIP
+        std::vector<Item>::iterator it = std::find (items.begin(), items.end(), searchItem);
+        std::cout << "You have a " + it->getName() + " already.";
+        return *it;
+    }
 };
 
 class Monster : public Entity
@@ -129,9 +128,7 @@ public:
         this->items.push_back(item);
         else
         {
-            //lookup item
-            //add 1 to item quantity
-            //WIP
+           findItem(item).increaseQuantity();
         }
     }
     void showItems()

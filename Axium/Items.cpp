@@ -15,10 +15,15 @@ class Item
 {
     itemType itemKind;
     std::string name;
-    int itemLevel, quantity;
+    int itemLevel, quantity = 1;
     bool stackable = false;;
     
 public:
+    bool operator ==(const Item &Right) const
+    {
+        return (name == Right.name) && (itemKind == Right.itemKind);
+    }
+    
     Item()
     {
         this->itemLevel = 0;
@@ -49,4 +54,5 @@ public:
     std::string getName() {return this->name;}
     int getLevel() {return this->itemLevel;}
     int getQuantity() {return this->quantity;}
+    void increaseQuantity() {this->quantity++;}
     };
