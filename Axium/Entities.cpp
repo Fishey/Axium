@@ -9,6 +9,7 @@
 #include "Entities.h"
 #include "Items.cpp"
 #include "includes.h"
+#include <algorithm>
 
 class Entity
 {
@@ -21,6 +22,7 @@ public:
     std::string getName() {return this->name;}
     std::string getType() {return this->type;}
     std::string getGender() {if(this->genderType == male) return "male"; else if (this->genderType == female) return "female"; else return "unknown";}
+    std::string getGenderText() {if(this->genderType == male) return "his"; else if (this->genderType == female) return "her"; else return "their";}
     gender getGenderType() {return this->genderType;}
     int getKarma() {return this->karma;}
     int getAttack() {
@@ -50,7 +52,7 @@ public:
             int tempDefense = this->defense;
             for (Item &item : this->items)
             {
-                if (item.getType() == attackType)
+                if (item.getType() == defenseType)
                     tempDefense += item.getLevel();
             }
             return tempDefense;
@@ -89,11 +91,14 @@ public:
         else return false;
     }
     
-   Item findItem(Item searchItem)
+   void findIncreaseItem(Item searchItem)
     {
         std::vector<Item>::iterator it = std::find (items.begin(), items.end(), searchItem);
         std::cout << "You have a " + it->getName() + " already.";
-        return *it;
+        if (it->isStackable())
+        {
+            it->increaseQuantity();
+        }
     }
 };
 
@@ -128,7 +133,7 @@ public:
         this->items.push_back(item);
         else
         {
-           findItem(item).increaseQuantity();
+            findIncreaseItem(item);
         }
     }
     void showItems()

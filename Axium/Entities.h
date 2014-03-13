@@ -8,7 +8,6 @@
 
 #ifndef __Axium__Entities__
 #define __Axium__Entities__
-#include <algorithm>
 enum gender {male, female};
 
 #endif /* defined(__Axium__Entities__) */

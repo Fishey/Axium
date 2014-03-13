@@ -7,11 +7,56 @@
 //
 #include "Combat.c"
 Player me;
+bool running = true;
+
+void chapterOneMenu(int option)
+{
+    switch (option) { // Use input to determine what to do next.
+        case 1:
+        {
+            Item batTooth("Bat tooth", 0, questType, true); // Create an item to be dropped by the Zubat.
+            Monster zubat("Zubat", 15,5,5,1, 90, batTooth); // Create the Zubat for the player to fight.
+            std::cout <<"A bat pops up out of nowhere and decides to get fresh with you!\nPress enter to continue . . .";
+            std::cin.ignore(2); // Say a line of text and wait for the user to press the Enter key.
+            running = Combat(zubat, me); // Start a fight with a predetermined opponent.
+            break;
+        }
+        case 2:
+            me.showItems();
+            break;
+        case 3:
+        {
+            Item Excalibur("Excalibur", 10, attackType);
+
+            if (!me.hasItem("Excalibur"))
+            {
+                me.acquireItem(Excalibur);
+            }
+            else
+            {
+                std::cout << "Foolish mortal! You already own the legendary sword Excalibur. Why would you need another?\nPress enter to continue . . .";
+                std::cin.ignore(2);
+            }
+            break;
+        }
+        case 4:
+        {
+            //goToInn();
+            break;
+        }
+        case 9:
+            sayWait("Goodbye!");
+            running = false;
+            break;
+        default:
+            break;
+    }
+
+}
 
 void initStory()
 {
     
-    bool running = true;
     me.setName("You");
     while (running != false)
     {
@@ -21,43 +66,11 @@ void initStory()
         std::cin >> option; // Wait for input.
         if (std::cin.fail())
         {
-            std::cout <<"Fuck you for trying to fuck with my code. Dick.";
+            std::cout <<"You need to enter an integer for this to work.";
             running = false;
         }
         else {
-        switch (option) { // Use input to determine what to do next.
-            case 1:
-            {
-                Item batTooth("Bat tooth", questType); // Create an item to be dropped by the Zubat.
-                Monster zubat("Zubat", 15,5,5,1, 90, batTooth); // Create the Zubat for the player to fight.
-                sayWait("A bat pops up out of nowhere and decides to get fresh with you!"); // Say a line of text and wait for the user to press the Enter key.
-                running = Combat(zubat, me); // Start a fight with a predetermined opponent.
-                break;
-            }
-            case 2:
-                me.showItems();
-                break;
-            case 3:
-            {
-                if (!me.hasItem("Excalibur"))
-                {
-                Item Excalibur("Excalibur", 10, attackType);
-                me.acquireItem(Excalibur);
-                }
-                else
-                {
-                    std::cout << "Foolish mortal! You already own the legendary sword Excalibur. Why would you need another?\nPress enter to continue . . .";
-                    std::cin.ignore(2);
-                }
-                break;
-            }
-            case 9:
-                sayWait("Goodbye!");
-                running = false;
-                break;
-            default:
-                break;
-        }
+            chapterOneMenu(option);
         }
     }
 }

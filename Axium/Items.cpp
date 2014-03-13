@@ -7,13 +7,15 @@
 //
 
 #include "Items.h"
+#include <iostream>
+
 enum itemType
 {
     attackType, defenseType, hitpointsType, questType, unknownType
 };
 class Item
 {
-    itemType itemKind;
+    itemType itemKind = unknownType;
     std::string name;
     int itemLevel, quantity = 1;
     bool stackable = false;;
@@ -36,6 +38,7 @@ public:
     }
     Item(std::string name, bool stackable)
     {
+        this->name = name;
         this->stackable = stackable;
     }
     Item(std::string name, int iLVL)
@@ -49,10 +52,18 @@ public:
         this->name = name;
         this->itemKind = itemKind;
     }
+    Item(std::string name, int iLVL, itemType itemKind, bool stackable)
+    {
+        this->itemLevel = iLVL;
+        this->name = name;
+        this->itemKind = itemKind;
+        this->stackable = stackable;
+    }
     
     itemType getType() {return this->itemKind;}
     std::string getName() {return this->name;}
     int getLevel() {return this->itemLevel;}
     int getQuantity() {return this->quantity;}
     void increaseQuantity() {this->quantity++;}
+    bool isStackable() {return this->stackable;}
     };

@@ -9,6 +9,5 @@
 #ifndef __Axium__Items__
 #define __Axium__Items__
 
-#include <iostream>
 
 #endif /* defined(__Axium__Items__) */
