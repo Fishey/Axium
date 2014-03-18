@@ -18,7 +18,7 @@ void chapterOneMenu(int option)
             Monster zubat("Zubat", 15,5,5,1, 90, batTooth); // Create the Zubat for the player to fight.
             std::cout <<"A bat pops up out of nowhere and decides to get fresh with you!\nPress enter to continue . . .";
             std::cin.ignore(2); // Say a line of text and wait for the user to press the Enter key.
-            running = Combat(zubat, me); // Start a fight with a predetermined opponent.
+            running = Combat(zubat, me); // Start a fight with a predetermined opponent. The return value determines whether the program continues running.
             break;
         }
         case 2:
@@ -28,7 +28,7 @@ void chapterOneMenu(int option)
         {
             Item Excalibur("Excalibur", 10, attackType);
 
-            if (!me.hasItem("Excalibur"))
+            if (!me.hasItem(Excalibur.getName()))
             {
                 me.acquireItem(Excalibur);
             }
@@ -56,7 +56,6 @@ void chapterOneMenu(int option)
 
 void initStory()
 {
-    
     me.setName("You");
     while (running != false)
     {

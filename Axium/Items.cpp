@@ -5,9 +5,7 @@
 //  Created by Randy on 06/03/14.
 //  Copyright (c) 2014 Randy. All rights reserved.
 //
-
 #include "Items.h"
-#include <iostream>
 
 enum itemType
 {
