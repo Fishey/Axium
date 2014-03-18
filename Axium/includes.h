@@ -12,14 +12,14 @@
 #include <sstream>
 #include <vector>
 
-std::string intToString(int i)
+static std::string intToString(int i)
 {
     std::stringstream ss;
     ss << i;
     return ss.str();
 }
 
-void sayWait(std::string input)
+static void sayWait(std::string input)
 {
     std::cout << input << "\n";
     std::cout << "Press enter to continue . . .";
@@ -33,7 +33,7 @@ void sayWait(std::string input)
         std::cout << "\b";
 }
 
-void clearScreen()
+static void clearScreen()
 {
     std::cout << std::string( 100, '\n' );
 }

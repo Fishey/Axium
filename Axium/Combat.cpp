@@ -6,11 +6,10 @@
 //  Copyright (c) 2014 Randy. All rights reserved.
 //
 
-#include "Entities.cpp"
-#include "includes.h"
-int damage;
+#include "Entities.h"
 
-void itemDrop(Monster &enemy, Player &me)
+
+static void itemDrop(Monster &enemy, Player &me)
 {
     int dropRate = 100 - enemy.getDropRate();
     int rollem = arc4random() % 100 + 1;
@@ -39,7 +38,7 @@ void itemDrop(Monster &enemy, Player &me)
     }
 }
 
-bool Combat(Monster &enemy, Player &me)
+static bool Combat(Monster &enemy, Player &me)
 {
     do
     {

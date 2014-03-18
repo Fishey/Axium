@@ -5,7 +5,7 @@
 //  Created by Randy on 17/02/14.
 //  Copyright (c) 2014 Randy. All rights reserved.
 //
-#include "Combat.c"
+#include "Combat.cpp"
 Player me;
 bool running = true;
 

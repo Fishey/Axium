@@ -7,25 +7,8 @@
 //
 
 #include "Entities.h"
-#include "Items.cpp"
-#include "includes.h"
-#include <algorithm>
 
-class Entity
-{
-protected:
-    gender genderType;
-    std::string name, type;
-    std::vector<Item> items;
-    int karma = arc4random() % 100 + 1, hitpoints, defense, attack, maxhp;
-public:
-    std::string getName() {return this->name;}
-    std::string getType() {return this->type;}
-    std::string getGender() {if(this->genderType == male) return "male"; else if (this->genderType == female) return "female"; else return "unknown";}
-    std::string getGenderText() {if(this->genderType == male) return "his"; else if (this->genderType == female) return "her"; else return "their";}
-    gender getGenderType() {return this->genderType;}
-    int getKarma() {return this->karma;}
-    int getAttack() {
+    int Entity::getAttack() {
         if (items.empty())
         {
         return this->attack;
@@ -41,8 +24,7 @@ public:
             return tempAttack;
         }
     }
-    int getHealth() {return this->hitpoints;}
-    int getDefense() {
+    int Entity::getDefense() {
         if (items.empty())
         {
             return this->defense;
@@ -58,7 +40,7 @@ public:
             return tempDefense;
         }
     }
-    std::vector<std::string> itemList()
+    std::vector<std::string> Entity::itemList()
     {
         std::vector<std::string> allItems;
         for (Item &item : this->items)
@@ -67,23 +49,17 @@ public:
         }
         return allItems;
     }
-    void setName(std::string name) {this->name = name;}
-    void setAttack(int attack) {this->attack = attack;}
-    void setDefense(int defense) {this->defense = defense;}
-    void takeDamage(int damage)
+    void Entity::takeDamage(int damage)
     {
         this->hitpoints = (hitpoints - (damage - defense));
         std::string output = this->getName() + " took " + intToString((damage - defense)) + " damage.";
         sayWait(output);
     }
-    void increaseDefense (int defense) {this->defense += defense;}
-    void increaseAttack (int attack) {this-> attack += attack;}
-    void increaseMaxHp (int hp) {this-> maxhp += hp; this->hitpoints += hp;}
-    void increaseHp (int hp) {
+    void Entity::increaseHp (int hp) {
         if (this->hitpoints + hp < maxhp) this->hitpoints += hp;
         else this->hitpoints = maxhp;
     }
-    bool hasItem(std::string itemName)
+    bool Entity::hasItem(std::string itemName)
     {
         std::vector<std::string> itemNames = itemList();
         if (std::find(itemNames.begin(), itemNames.end(), itemName) != itemNames.end())
@@ -91,7 +67,7 @@ public:
         else return false;
     }
     
-   void findIncreaseItem(Item searchItem)
+    void Entity::findIncreaseItem(Item searchItem)
     {
         std::vector<Item>::iterator it = std::find (items.begin(), items.end(), searchItem);
         std::cout << "You have a " + it->getName() + " already.";
@@ -100,35 +76,18 @@ public:
             it->increaseQuantity();
         }
     }
-};
 
-class Monster : public Entity
-{
-private:
-    int mobLevel, dropRate;
-    Item droppedItem;
-public:
-    Monster(std::string name, int hitpoints, int defense, int attack, int mobLevel, int dropRate, Item droppedItem)
+    Monster::Monster(std::string name, int hitpoints, int defense, int attack, int mobLevel, int dropRate, Item droppedItem)
     {
         this->name = name; this->hitpoints = hitpoints; this->defense = defense; this->attack = attack; this->mobLevel = mobLevel; this->droppedItem = droppedItem; this->dropRate = dropRate;
-    }
-    int getMobLevel() {return mobLevel;}
-    int getItemLevel() {return droppedItem.getLevel();}
-    int getDropRate() {return dropRate;}
-    Item getDroppedItem() {return droppedItem;}
-    std::string getDroppedItemName() {return droppedItem.getName();}
-    
-};
+    };
 
-class Player : public Entity
-{
-public:
-    Player()
+    Player::Player()
     {
         this->attack = 10; this->defense = 0; this->hitpoints = 100; this->maxhp = 100;
-    }
+    };
     
-    void acquireItem(Item item) {
+    void Player::acquireItem(Item item) {
         if (!hasItem(item.getName()))
         this->items.push_back(item);
         else
@@ -136,7 +95,7 @@ public:
             findIncreaseItem(item);
         }
     }
-    void showItems()
+    void Player::showItems()
     {
         int i = 0;
         for (Item &item : this->items)
@@ -147,4 +106,3 @@ public:
         sayWait("");
         std::cin.ignore(1);
     }
-};
