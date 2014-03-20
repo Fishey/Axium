@@ -8,6 +8,11 @@
 
 #include "Entities.h"
 
+    void Entity::restoreHealth()
+    {
+        sayWait("Your health has been fully restored.");
+        this->hitpoints = this->maxhp;
+    }
     int Entity::getAttack() {
         if (items.empty())
         {
@@ -52,8 +57,8 @@
     void Entity::takeDamage(int damage)
     {
         this->hitpoints = (hitpoints - (damage - defense));
-        std::string output = this->getName() + " took " + intToString((damage - defense)) + " damage.";
-        sayWait(output);
+        sayWait(this->getName() + " took " + intToString((damage - defense)) + " damage.");
+
     }
     void Entity::increaseHp (int hp) {
         if (this->hitpoints + hp < maxhp) this->hitpoints += hp;
@@ -70,7 +75,7 @@
     void Entity::findIncreaseItem(Item searchItem)
     {
         std::vector<Item>::iterator it = std::find (items.begin(), items.end(), searchItem);
-        std::cout << "You have a " + it->getName() + " already.";
+        std::cout << "You have a " + it->getName() + " already.\n";
         if (it->isStackable())
         {
             it->increaseQuantity();
@@ -79,12 +84,12 @@
 
     Monster::Monster(std::string name, int hitpoints, int defense, int attack, int mobLevel, int dropRate, Item droppedItem)
     {
-        this->name = name; this->hitpoints = hitpoints; this->defense = defense; this->attack = attack; this->mobLevel = mobLevel; this->droppedItem = droppedItem; this->dropRate = dropRate;
+        this->name = name; this->hitpoints = hitpoints; this->defense = defense; this->attack = attack; this->mobLevel = mobLevel; this->droppedItem = droppedItem; this->dropRate = dropRate; this->money = arc4random() % mobLevel + 1;
     };
 
     Player::Player()
     {
-        this->attack = 10; this->defense = 0; this->hitpoints = 100; this->maxhp = 100;
+        this->attack = 10; this->defense = 0; this->hitpoints = 100; this->maxhp = 100; this->money = 0; this->alive = true;
     };
     
     void Player::acquireItem(Item item) {
@@ -98,11 +103,18 @@
     void Player::showItems()
     {
         int i = 0;
-        for (Item &item : this->items)
+        if (!items.empty())
         {
-            i++;
-            std::cout << intToString(item.getQuantity()) + " of " "Item # " + intToString(i) + " : " + item.getName() + "\n";
+            for (Item &item : this->items)
+            {
+                i++;
+                std::cout << intToString(item.getQuantity()) + " of " "Item # " + intToString(i) + " : " + item.getName() + "\n";
+            }
+            sayWait("");
         }
-        sayWait("");
+        else
+        {
+            sayWait("You don't currently have any items.\n");
+        }
         std::cin.ignore(1);
     }

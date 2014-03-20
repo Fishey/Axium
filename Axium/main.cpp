@@ -7,9 +7,25 @@
 //
 #include "Combat.cpp"
 Player me;
-bool running = true;
 
-void chapterOneMenu(int option)
+void goToInn()
+{
+    int input;
+    std::cout <<"You enter the inn.";
+    std::cout << "It costs 5 gold to use the inn. Would you like to stay the night?\n 1. Yes - 2. No\n";
+    std::cin >> input;
+    if (input == 1 && me.getMoney() >= 5)
+    {
+        me.acquireMoney(-5);
+        me.restoreHealth();
+    }
+    else if (me.getMoney() < 5)
+    {
+        sayWait2("You can't afford to do that!");
+    }
+}
+
+void chapterOneMenu(int option, bool &chapterOne)
 {
     switch (option) { // Use input to determine what to do next.
         case 1:
@@ -18,10 +34,12 @@ void chapterOneMenu(int option)
             Monster zubat("Zubat", 15,5,5,1, 90, batTooth); // Create the Zubat for the player to fight.
             std::cout <<"A bat pops up out of nowhere and decides to get fresh with you!\nPress enter to continue . . .";
             std::cin.ignore(2); // Say a line of text and wait for the user to press the Enter key.
-            running = Combat(zubat, me); // Start a fight with a predetermined opponent. The return value determines whether the program continues running.
+            Combat(zubat, me); // Start a fight with a predetermined opponent. The return value determines whether the program continues running.
             break;
         }
         case 2:
+            clearScreen();
+            std::cout << "\nYou currently have " << me.getMoney() << " gold.\n";
             me.showItems();
             break;
         case 3:
@@ -41,12 +59,12 @@ void chapterOneMenu(int option)
         }
         case 4:
         {
-            //goToInn();
+            goToInn();
             break;
         }
         case 9:
-            sayWait("Goodbye!");
-            running = false;
+            sayWait2("Goodbye!");
+            me.setLiving(false);
             break;
         default:
             break;
@@ -56,26 +74,32 @@ void chapterOneMenu(int option)
 
 void initStory()
 {
+    bool chapterOne = true;
     me.setName("You");
-    while (running != false)
+    while (me.getLiving() && chapterOne)
     {
         clearScreen(); // Clear the screen.
         int option;
-        std::cout << "What would you like to do? Enter the number for the option you would like. \n1. Fight - 2. Check items. - 9. Exit\n"; // Ask the user for input.
+        std::cout << "What would you like to do? Enter the number for the option you would like. \n1. Fight. - 2. Check items. 3. Obtain the mighty blade Excalibur. - 4. Visit the inn. - 9. Exit\n"; // Ask the user for input.
         std::cin >> option; // Wait for input.
         if (std::cin.fail())
         {
             std::cout <<"You need to enter an integer for this to work.";
-            running = false;
+            me.setLiving(false);
         }
         else {
-            chapterOneMenu(option);
+            chapterOneMenu(option, chapterOne);
         }
     }
 }
 
 int main(int argc, const char * argv[])
 {
+    
     initStory();
+    if(me.getLiving())
+    {
+    sayWait("The next area is full of unicorns and rainbows. What will you do now?");
+    }
     return 0;
 }

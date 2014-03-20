@@ -33,6 +33,20 @@ static void sayWait(std::string input)
         std::cout << "\b";
 }
 
+static void sayWait2(std::string input)
+{
+    std::cout << input << "\n";
+    std::cout << "Press enter to continue . . .";
+    std::cin.ignore(2);
+    std::cout << "\033[F";
+    for(int i = 0; i < 31; i++)
+        std::cout << "\b";
+    for(int i = 0; i < 31; i++)
+        std::cout << " ";
+    for(int i = 0; i < 31; i++)
+        std::cout << "\b";
+}
+
 static void clearScreen()
 {
     std::cout << std::string( 100, '\n' );
