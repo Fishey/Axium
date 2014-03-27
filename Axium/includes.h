@@ -11,6 +11,15 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include <thread>
+#include <chrono>
+#include <fstream>
+
+static bool fexists(const char *filename)
+{
+    std::ifstream ifile(filename);
+    return ifile.good();
+}
 
 static std::string intToString(int i)
 {

@@ -35,6 +35,22 @@ public:
     Item(std::string name, int iLVL, itemType itemKind, bool stackable);
     
     itemType getType() {return this->itemKind;}
+    std::string getTypeString()
+    {
+        switch(this->itemKind)
+        {
+            case attackType:
+                return "attackType";
+            case defenseType:
+                return "defenseType";
+            case hitpointsType:
+                return "hitpointsType";
+            case questType:
+                return "questType";
+            case unknownType:
+                return "unknownType";
+        }
+    }
     std::string getName() {return this->name;}
     int getLevel() {return this->itemLevel;}
     int getQuantity() {return this->quantity;}
