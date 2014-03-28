@@ -44,7 +44,7 @@ static void loadChar()
                 std::string itemName = character["items"][num].get("name", "unknownItem").asString();
                 std::string itemTypeString = character["items"][num].get("type", "unknownType").asString();
                 itemType newItemType = unknownType;
-                if (itemTypeString == "attack")
+                if (itemTypeString == "attackType")
                     newItemType = attackType;
                 else if (itemTypeString == "defenseType")
                     newItemType = defenseType;
