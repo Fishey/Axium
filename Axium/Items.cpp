@@ -40,3 +40,11 @@ Item::Item(std::string name, int iLVL, itemType itemKind, bool stackable)
         this->itemKind = itemKind;
         this->stackable = stackable;
     }
+Item::Item(std::string name, int iLVL, itemType itemKind, bool stackable, int quantity)
+{
+    this->itemLevel = iLVL;
+    this->name = name;
+    this->itemKind = itemKind;
+    this->stackable = stackable;
+    this->quantity = quantity;
+}

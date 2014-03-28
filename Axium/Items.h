@@ -33,6 +33,7 @@ public:
     Item(std::string name, int iLVL);
     Item(std::string name, int iLVL, itemType itemKind);
     Item(std::string name, int iLVL, itemType itemKind, bool stackable);
+    Item(std::string name, int iLVL, itemType itemKind, bool stackable, int quantity);
     
     itemType getType() {return this->itemKind;}
     std::string getTypeString()

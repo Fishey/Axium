@@ -38,6 +38,31 @@ static void loadChar()
             me.setMaxHp(character["hitpoints"].asInt());
             me.setHp(character["currhitpoints"].asInt());
             me.setGold(character["gold"].asInt());
+            for (Json::ValueIterator i = character["items"].begin(); i != character["items"].end(); i++)
+            {
+                int num = i.index();
+                std::string itemName = character["items"][num].get("name", "unknownItem").asString();
+                std::string itemTypeString = character["items"][num].get("type", "unknownType").asString();
+                itemType newItemType = unknownType;
+                if (itemTypeString == "attack")
+                    newItemType = attackType;
+                else if (itemTypeString == "defenseType")
+                    newItemType = defenseType;
+                else if (itemTypeString == "hitpointsType")
+                    newItemType = hitpointsType;
+                else if (itemTypeString == "questType")
+                    newItemType = questType;
+                else
+                    newItemType = unknownType;
+                
+                int itemLevel = character["items"][num].get("level", "unknownItem").asInt();
+                int itemQuantity = character["items"][num].get("quantity", "unknownItem").asInt();
+                bool itemStackable = character["items"][num].get("stackable", false).asBool();
+                
+                Item newItem(itemName, itemLevel, newItemType, itemStackable, itemQuantity);
+                me.acquireItem(newItem);
+
+            }
             me.setSkills();
             
             sayWait2("Your character has been restored.");
@@ -48,6 +73,10 @@ static void loadChar()
             
             std::cout << reader.getFormatedErrorMessages();
         }
+    }
+    else
+    {
+        sayWait2("No save file was found.");
     }
 }
 
@@ -61,16 +90,18 @@ static void saveChar(int chapter)
     character["class"] = me.getClassName();
     character["hitpoints"] = me.getMaxHp();
     character["currhitpoints"] = me.getHealth();
-    character["attack"] = me.getAttack();
-    character["defense"] = me.getDefense();
+    character["attack"] = me.getBaseAttack();
+    character["defense"] = me.getBaseDefense();
     character["gold"] = me.getMoney();
     for(std::vector<Item>::size_type i = 0; i != me.getItems().size(); i++)
     {
         Json::Value thisNewItem;
+        
         thisNewItem["name"] = me.getItems()[i].getName();
         thisNewItem["type"] = me.getItems()[i].getTypeString();
         thisNewItem["level"] = me.getItems()[i].getLevel();
         thisNewItem["quantity"] = me.getItems()[i].getQuantity();
+        thisNewItem["stackable"] = me.getItems()[i].isStackable();
         
         character["items"].append(thisNewItem);
     }

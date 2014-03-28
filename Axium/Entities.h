@@ -31,6 +31,8 @@ class Entity
         int getKarma() {return this->karma;}
         int getMoney() {return this->money;}
         int getAttack();
+        int getBaseAttack(){return this->attack;}
+        int getBaseDefense(){return this->defense;}
         int getHealth() {return this->hitpoints;}
         int getDefense();
         int getMaxHp() {return this->maxhp;}
