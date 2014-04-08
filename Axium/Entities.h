@@ -48,10 +48,10 @@ class Entity
         void setMaxHp(int maxhp) {this->maxhp = maxhp;}
         void setGold(int money) {this->money = money;}
         void takeDamage(int damage);
-        void decreaseHp (int hp){this->hitpoints -= hp; sayWait("You have lost "+ intToString(hp) + " hitpoints.");}
+        void decreaseHp (int hp);
         void increaseHp (int hp);
         void increaseDefense (int defense) {this->defense += defense;}
-        void increaseAttack (int attack) {this-> attack += attack;}
+        void increaseAttack (int attack);
         void increaseMaxHp (int hp) {this-> maxhp += hp; this->hitpoints += hp;}
         void findIncreaseItem(Item searchItem);
         bool hasItem(std::string itemName);
@@ -77,6 +77,7 @@ public:
 class Player : public Entity
 {
 private:
+    int chapter;
     type classType;
 public:
     Player();
@@ -91,6 +92,8 @@ public:
     std::string getClassName();
     void showItems();
     void setClass(type classType);
+    void setChapter(int chapter){this->chapter = chapter;}
+    int getChapter() {return this->chapter;}
 };
 
 

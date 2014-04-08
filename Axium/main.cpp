@@ -6,18 +6,21 @@
 //  Copyright (c) 2014 Randy. All rights reserved.
 //
 #include "Combat.cpp"
-#include "json/writer.h"
 #include "json/json.h"
 
 Player me;
 
-static void loadChar()
+void initStory();
+
+static void loadChar(std::string path) // Restore stats of a previous character from a JSON file.
 {
+    path = path + ".sav";
     Json::Reader reader;
     Json::Value character;
-    if (fexists("out.json"))
+    
+    if (fexists("out.sav") || fexists("quick.sav"))
     {
-        std::fstream loadFile("out.json");
+        std::fstream loadFile(path);
         
         if (loadFile.fail())
         {
@@ -28,16 +31,18 @@ static void loadChar()
         
         if (parsingSuccessful)
         {
+            sayWait2("\nYour character has been restored.");
             me = *new Player();
+            me.setName(character["name"].asString());
             if (character["class"] == "Paladin") me.setClass(Paladin);
             else if (character["class"] == "Commander") me.setClass(Commander);
             else if (character["class"] == "Ninja") me.setClass(Ninja);
             me.setDefense(character["defense"].asInt());
             me.setAttack(character["attack"].asInt());
-            me.setName(character["name"].asString());
             me.setMaxHp(character["hitpoints"].asInt());
             me.setHp(character["currhitpoints"].asInt());
             me.setGold(character["gold"].asInt());
+            me.setChapter(character["chapter"].asInt());
             for (Json::ValueIterator i = character["items"].begin(); i != character["items"].end(); i++)
             {
                 int num = i.index();
@@ -65,7 +70,8 @@ static void loadChar()
             }
             me.setSkills();
             
-            sayWait2("Your character has been restored.");
+            if (me.getChapter() == 1)
+                initStory();
         }
         else
         {
@@ -80,11 +86,39 @@ static void loadChar()
     }
 }
 
-
-static void saveChar(int chapter)
+static void quickSave() // Saves stats of a character to a JSON file.
 {
     Json::StyledStreamWriter writer;
-    std::ofstream out("out.json");
+    std::ofstream out("quick.sav");
+    Json::Value character;
+    character["name"] = me.getName();
+    character["class"] = me.getClassName();
+    character["hitpoints"] = me.getMaxHp();
+    character["currhitpoints"] = me.getHealth();
+    character["attack"] = me.getBaseAttack();
+    character["defense"] = me.getBaseDefense();
+    character["gold"] = me.getMoney();
+    for(std::vector<Item>::size_type i = 0; i != me.getItems().size(); i++)
+    {
+        Json::Value thisNewItem;
+        
+        thisNewItem["name"] = me.getItems()[i].getName();
+        thisNewItem["type"] = me.getItems()[i].getTypeString();
+        thisNewItem["level"] = me.getItems()[i].getLevel();
+        thisNewItem["quantity"] = me.getItems()[i].getQuantity();
+        thisNewItem["stackable"] = me.getItems()[i].isStackable();
+        
+        character["items"].append(thisNewItem);
+    }
+        character["chapter"] = me.getChapter();
+    
+    writer.write(out, character);
+}
+
+static void saveChar(int chapter) // Saves stats of a character to a JSON file.
+{
+    Json::StyledStreamWriter writer;
+    std::ofstream out("out.sav");
     Json::Value character;
     character["name"] = me.getName();
     character["class"] = me.getClassName();
@@ -110,17 +144,7 @@ static void saveChar(int chapter)
     writer.write(out, character);
 }
 
-
-void titleScreen()
-{
-    clearScreen();
-    std::string title = "     ___________\n._____l_______l_____.\n||_____/  |  \\_____||\n      /   |   \\\n     /    |    \\\n    /     |     \\\n   /      |      \\\n  /       |       \\\n /        |        \\\n|         |         |\n \\        |        /\n   \\      |      /\n     \\    |    /\n       \\  |  /\n         \\|/\n          `\n";
-    
-    title +="\t\t\tWelcome to Axium, brave warrior.\n\nThis will be a story not to be forgotten so easily.\nIf you think you are ready to handle the pressure, follow the instructions on your screen now.\n\n";
-    sayWait(title);
-}
-
-void goToInn()
+void goToInn() // Visit an inn, if the player has enough money to afford staying, and if they choose to do so, restore hitpoints to the maximum.
 {
     clearScreen();
     int input;
@@ -155,7 +179,7 @@ void goToInn()
     }
 }
 
-void statsMenu()
+void statsMenu() // Show stats for the Player.
 {
     std::cout << "Stats for " << me.getName() << ", the young " << me.getClassName() << " :\n";
     std::cout << "Your current hitpoints: " + intToString(me.getHealth()) + ".\n";
@@ -165,7 +189,7 @@ void statsMenu()
     me.showItems();
 }
 
-void chapterOneMenu(int option, bool &chapterOne)
+void chapterOneMenu(int option, bool &chapterOne) // Perform an action based on the input previously given.
 {
     switch (option) { // Use input to determine what to do next.
         case 1:
@@ -173,9 +197,9 @@ void chapterOneMenu(int option, bool &chapterOne)
             clearScreen();
             Item batTooth("Bat tooth", 0, questType, true); // Create an item to be dropped by the Zubat.
             Monster zubat("Zubat", 15,5,5,1, 90, batTooth); // Create the Zubat for the player to fight.
-            std::cout <<"A bat pops up out of nowhere and decides to get fresh with you!\nPress enter to continue . . .";
-            std::cin.ignore(2); // Say a line of text and wait for the user to press the Enter key.
+            sayWait2("A bat pops up out of nowhere and decides to get fresh with you!");
             Combat(zubat, me); // Start a fight with a predetermined opponent. The return value determines whether the program continues running.
+            quickSave();
             break;
         }
         case 2:
@@ -212,15 +236,26 @@ void chapterOneMenu(int option, bool &chapterOne)
         }
         case 5:
         {
-            Item loot("Hobo's coat", 5, defenseType);
+            /*Item loot("Hobo's coat", 5, defenseType);
             Monster destroyer("defenseless hobo", 100, 5, 15, 4, 90, loot);
-            Combat(destroyer, me);
+            Combat(destroyer, me);*/
+            Item tail("Elin's tail", 5, defenseType);
+            Monster Elin("adorable-looking Elin", 150, 5, 20, 9, 90, tail);
+            Combat(Elin, me);
             break;
         }
             
         case 6:
         {
-            loadChar();
+            loadChar("out");
+            break;
+        }
+            
+        case 7:
+        {
+            clearScreen();
+            sayWait2("Quicksaving . . .");
+            saveChar(1);
             break;
         }
         case 9:
@@ -234,32 +269,41 @@ void chapterOneMenu(int option, bool &chapterOne)
 
 }
 
-void initStory()
+void createChar() // Create a new character with base stats after asking the user about the details: name and class.
 {
     int input;
-    std::cout << " what will be your class young adventurer?. \n 1. the boring paladin, \n 2. the amateur ninja, \n 3. the cheap commander. ";
+    std::cout << "First of all, what will be your class, young adventurer? \n1. The Boring Paladin\t\t\t2. The Amateur Ninja\n3. The Cheap Commander.\n";
     std::cin >> input;
+    
+    if (std::cin.fail())
+    {
+        std::cin.clear();
+        std::cin.ignore(10000,'\n');
+        sayWait("You need to enter an integer for this to work.");
+        createChar();
+    }
+    
     switch (input)
     {
         case 1:
         {
             me.setClass(Paladin);
-            sayWait2("you are a boring Paladin even tough you can be pretty awesome most of the time you bore the crap out of people");
             me.setSkills();
+            sayWait2("You are a boring Paladin. Even tough you can be pretty awesome, most of the time you bore the crap out of people.\nYou use holy attacks, and a massive shield to keep yourself safe at all times.");
             break;
         }
         case 2:
         {
             me.setClass(Ninja);
             me.setSkills();
-            sayWait2(" you are a ninja. you use awesome ninja skills to silently take out enemys and chop there head of with katana,s. But you are a amateur so most of these things you can't even do ");
+            sayWait("You are a Ninja. You use awesome ninja skills to silently take out enemies and chop their head off with katanas. But, sadly, you are an amateur, so most of these things you can't even do just yet.");
             break;
         }
         case 3:
         {
             me.setClass(Commander);
             me.setSkills();
-            sayWait2(" you are a cheap ass moterfucking commander. even tough you use guns they are not as effective as you might think. So even tough you are not as cheap ass as people say, you are still cheapass ");
+            sayWait2("You are a Commander, and a bit of a cheap one at that. You shoot your targets at range, making yourself technically impervious to melee attackers. \nHowever, due to game limitations they will still be able to damage you.\nRegardless, you have some of the most damaging skills of any class and a hefty amount of health. Thus, you are a bit of a cheapass.");
             break;
         }
             
@@ -270,13 +314,16 @@ void initStory()
             break;
             
     }
+    initStory();}
+
+void initStory() // Show the user their options and then await input. Use this input in a function to determine what it does.
+{
     bool chapterOne = true;
-    me.setName("You");
     while (chapterOne)
     {
         clearScreen(); // Clear the screen.
         int option;
-        std::cout << "What would you like to do? Enter the number for the option you would like. \n1. Fight. \t\t\t\t 2. View stats and items. \n3. Look around the area for items. \t 4. Visit the inn.\n5. Fight an unspeakable boss monster.\t6. Load previous character. \n9. Exit\n"; // Ask the user for input.
+        std::cout << "What would you like to do? Enter the number for the option you would like. \n1. Fight. \t\t\t\t2. View stats and items. \n3. Look around the area for items. \t4. Visit the inn.\n5. Fight an unspeakable boss monster.\t6. Load previous character. \n7. Quicksave.\n9. Exit\n"; // Ask the user for input.
         std::cin >> option; // Wait for input.
         if (std::cin.fail())
         {
@@ -290,10 +337,57 @@ void initStory()
     }
 }
 
+void titleScreen() // Show the initial title screen. If a save file is found display the option to continue. If not, or if the user chooses not to continue, immediately create a character.
+{
+    clearScreen();
+    std::string title = "     ___________\n._____l_______l_____.\n||_____/  |  \\_____||\n      /   |   \\\n     /    |    \\\n    /     |     \\\n   /      |      \\\n  /       |       \\\n /        |        \\\n|         |         |\n \\        |        /\n   \\      |      /\n     \\    |    /\n       \\  |  /\n         \\|/\n          `\n";
+    
+    if (!fexists("out.sav") && !fexists("quick.sav"))
+    {
+        title +="\t\t\tWelcome to Axium, brave warrior.";
+        sayWait(title);
+        createChar();
+    }
+    else if (fexists("out.sav") || !fexists("quick.sav"))
+    {
+        int input;
+        title +="\t\t\tWelcome back to Axium, brave warrior.\n";
+        title +="Would you like to continue your previous character's story?\n";
+        title +="1. Load Quicksave (latest save).\t\t2. Load save file #1.\n9. New game\n";
+        std::cout << title;
+        std::cin >> input;
+        
+        if (std::cin.fail())
+        {
+            std::cin.clear();
+            std::cin.ignore(10000,'\n');
+            sayWait("You need to enter an integer for this to work.");
+            titleScreen();
+        }
+        else
+        {
+            if (input == 1)
+                loadChar("out");
+            else if (input == 2)
+            {
+                loadChar("quick");
+            }
+            else if (input == 3)
+            {
+                sayWait2("\n\nThis will be a story not to be forgotten so easily.\nIf you think you are ready to handle the pressure, follow the instructions on your screen now.");
+                clearScreen();
+                createChar();
+            }
+            
+        }
+    }
+}
+
+
 int main(int argc, const char * argv[])
 {
+    me.setName("You");
     titleScreen();
-    initStory();
     sayWait("The next area is full of unicorns and rainbows. What will you do now?");
     return 0;
 }

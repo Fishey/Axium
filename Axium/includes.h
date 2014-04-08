@@ -15,20 +15,20 @@
 #include <chrono>
 #include <fstream>
 
-static bool fexists(const char *filename)
+static bool fexists(const char *filename) // If file exists, return true. If not, return false.
 {
     std::ifstream ifile(filename);
     return ifile.good();
 }
 
-static std::string intToString(int i)
+static std::string intToString(int i) // Return the supplied int in string form.
 {
     std::stringstream ss;
     ss << i;
     return ss.str();
 }
 
-static void sayWait(std::string input)
+static void sayWait(std::string input) // Say a line, then display "Press enter to continue . . ." below. Wait for user to press enter, then remove the line and replace it with another.
 {
     std::cout << input << "\n";
     std::cout << "Press enter to continue . . .";
@@ -42,7 +42,7 @@ static void sayWait(std::string input)
         std::cout << "\b";
 }
 
-static void sayWait2(std::string input)
+static void sayWait2(std::string input) // Say a line, then display "Press enter to continue . . ." below. Wait for user to press enter, then remove the line and replace it with another. This function ignores 2 enters.
 {
     std::cout << input << "\n";
     std::cout << "Press enter to continue . . .";
@@ -56,7 +56,7 @@ static void sayWait2(std::string input)
         std::cout << "\b";
 }
 
-static void clearScreen()
+static void clearScreen() // Clear the screen with 100 newlines.
 {
     std::cout << std::string( 100, '\n' );
 }

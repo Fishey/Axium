@@ -8,12 +8,13 @@
 
 #include "Entities.h"
 
-    void Entity::restoreHealth()
+    void Entity::restoreHealth() // Restore hitpoints to the maximum.
     {
         sayWait("Your health has been fully restored.");
         this->hitpoints = this->maxhp;
     }
-    int Entity::getAttack() {
+    int Entity::getAttack() // Return the total amount of Attack power of a player or monster. Takes into account any items they have equipped.
+    {
         if (items.empty())
         {
         return this->attack;
@@ -29,7 +30,8 @@
             return tempAttack;
         }
     }
-    int Entity::getDefense() {
+    int Entity::getDefense() // Return the total amount of Defense of a player or monster. Takes into account any items they have equipped.
+    {
         if (items.empty())
         {
             return this->defense;
@@ -45,7 +47,7 @@
             return tempDefense;
         }
     }
-    std::vector<std::string> Entity::itemList()
+    std::vector<std::string> Entity::itemList() // Return all the item names in a list of strings.
     {
         std::vector<std::string> allItems;
         for (Item &item : this->items)
@@ -54,22 +56,25 @@
         }
         return allItems;
     }
-    void Entity::takeDamage(int damage)
+    void Entity::takeDamage(int damage) // Lowers the Entity's health by the amount supplied. Takes into account any defense the Entity may have. If the damage is lower than the amount of defense, instead heals the Entity up to full HP.
     {
         if ((damage - defense) >= 0)
         {
-            this->hitpoints = (hitpoints - (damage - defense));
             std::string capitalized = this->getName();
             capitalized[0] = toupper(capitalized[0]);
-            sayWait(capitalized + " took " + intToString((damage - defense)) + " damage.");
+            if (hitpoints - (damage - defense) > 0)
+                sayWait(capitalized + " took " + intToString((damage - defense)) + " damage.");
+            else
+                sayWait(capitalized + " took " + intToString(hitpoints) + " damage.");
+            this->hitpoints = (hitpoints - (damage - defense));
         }
         else if ((damage - defense) < 0)
         {
-            if(((hitpoints - (damage - defense)) < maxhp))
+            if(hitpoints - (damage - defense) < maxhp)
             {
                 sayWait("The blow glances off the target, allowing it to heal for " + intToString(-(damage-defense)) + " hitpoints!");
 
-               this->hitpoints = (hitpoints - (damage - defense));
+               this->hitpoints = hitpoints - (damage - defense);
             }
             else
             {
@@ -81,19 +86,40 @@
 
 
     }
-    void Entity::increaseHp (int hp) {
+    void Entity::increaseAttack(int attack) // Increases the Entity's Attack by the supplied amount. Also displays a message saying what the new Attack value is.
+    {
+     this-> attack += attack;
+    std::string capitalized = this->getName();
+    capitalized[0] = toupper(capitalized[0]);
+    sayWait("Attack power of " + this->getName() + " has been increased to " + intToString(this->attack) + ".");
+
+}
+    void Entity::decreaseHp(int hp) // Lowers the Entity's health by the amount supplied. Does NOT take into account any defense they may have.
+    {
+    this->hitpoints -= hp;
+    std::string capitalized = this->getName();
+    capitalized[0] = toupper(capitalized[0]);
+    sayWait(capitalized + " lost "+ intToString(hp) + " hitpoints.");
+}
+    void Entity::increaseHp (int hp) // Increases the Entity's current hitpoints by the supplied amount, up to it's max HP.
+    {
         if (this->hitpoints + hp < maxhp)
         {
             this->hitpoints += hp;
-            sayWait("You have recovered " + intToString(hp) + " hitpoints.");
+            std::string capitalized = this->getName();
+            capitalized[0] = toupper(capitalized[0]);
+            sayWait(capitalized + " recovered " + intToString(hp) + " hitpoints.");
         }
 
         else
         {
+            std::string capitalized = this->getName();
+            capitalized[0] = toupper(capitalized[0]);
+            sayWait(capitalized + " recovered to full hitpoints.");
             this->hitpoints = maxhp;
         }
     }
-    bool Entity::hasItem(std::string itemName)
+    bool Entity::hasItem(std::string itemName) // Returns whether or not the Entity already has the item supplied, based on the item's name.
     {
         std::vector<std::string> itemNames = itemList();
         if (std::find(itemNames.begin(), itemNames.end(), itemName) != itemNames.end())
@@ -101,7 +127,7 @@
         else return false;
     }
     
-    void Entity::findIncreaseItem(Item searchItem)
+    void Entity::findIncreaseItem(Item searchItem) // Increases the quantity of the item an Entity has if it is stackable.
     {
         std::vector<Item>::iterator it = std::find (items.begin(), items.end(), searchItem);
         if (it->isStackable())
@@ -110,27 +136,39 @@
         }
     }
 
-    Monster::Monster(std::string name, int hitpoints, int defense, int attack, int mobLevel, int dropRate, Item droppedItem)
+    Monster::Monster(std::string name, int hitpoints, int defense, int attack, int mobLevel, int dropRate, Item droppedItem) // Set values for a new Monster.
     {
         this->name = name; this->hitpoints = hitpoints; this->maxhp = this->hitpoints; this->defense = defense; this->attack = attack; this->mobLevel = mobLevel; this->droppedItem = droppedItem; this->dropRate = dropRate; this->money = arc4random() % mobLevel + 1;
     };
 
-    Player::Player()
+    Player::Player() // Set initial values for a new Player.
     {
         this->attack = 10; this->defense = 0; this->hitpoints = 100; this->maxhp = 100; this->money = 0; this->alive = true;
     };
 
     
     
-    void Player::acquireItem(Item item) {
+    void Player::acquireItem(Item item) // Make the Player acquire an item. If they already have this item, try to increase it's quantity.
+    {
         if (!hasItem(item.getName()))
-        this->items.push_back(item);
+        {
+            this->items.push_back(item);
+            if (item.getType() == hitpointsType)
+            {
+                this->increaseHp(item.getLevel());
+            }
+        }
         else
         {
             findIncreaseItem(item);
+            if (item.getType() == hitpointsType)
+            {
+                this->increaseHp(item.getLevel());
+            }
+
         }
     }
-    void Player::showItems()
+    void Player::showItems() // Displays all items the Player currently has in a formatted string. If the item possesses offensive or defensive stats, display them.
     {
         int i = 0;
         if (!items.empty())
@@ -153,20 +191,20 @@
         std::cin.ignore(1);
     }
 
-void Player::setClass(type classType)
-{
+    void Player::setClass(type classType) // Set a player's class and change stats accordingly.
+    {
     this->classType = classType;
     switch (classType) {
         case Paladin:
-            this->increaseDefense(5);
-            this->increaseMaxHp(20);
+            this->setDefense(5);
+            this->setMaxHp(120);
             break;
         case Ninja:
-            this->increaseAttack(5);
-            this->increaseMaxHp(-20);
+            this->setAttack(15);
+            this->setMaxHp(80);
             break;
         case Commander:
-            this->increaseMaxHp(50);
+            this->setMaxHp(150);
             break;
             
         default:
@@ -174,13 +212,13 @@ void Player::setClass(type classType)
     }
 }
 
-void Entity::setSkills()
-{
+    void Entity::setSkills()
+    {
     // do nothing
 }
 
-void Player::setSkills()
-{
+    void Player::setSkills() // Set a Player's skills, changing the names according to the class.
+    {
     if (this->getType() == Paladin)
     {
         this->skills.push_back("Holy Recovery");
@@ -213,7 +251,7 @@ void Player::setSkills()
     }
 }
 
-std::string Player::getClassName()
+std::string Player::getClassName() // Returns the name of the class in string form.
 {
     switch (this->classType) {
         case Paladin:

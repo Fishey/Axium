@@ -55,7 +55,7 @@ public:
     std::string getName() {return this->name;}
     int getLevel() {return this->itemLevel;}
     int getQuantity() {return this->quantity;}
-    void increaseQuantity() {this->quantity++;}
+    void increaseQuantity() {if (this->stackable) this->quantity++;}
     bool isStackable() {return this->stackable;}
 };
 

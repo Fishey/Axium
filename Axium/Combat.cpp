@@ -7,9 +7,9 @@
 //
 
 #include "Entities.h"
-static void Combat(Monster &enemy, Player &me);
+static void Combat(Monster &enemy, Player &me); // Forward declaration of Combat.
 
-static void itemDrop(Monster &enemy, Player &me)
+static void itemDrop(Monster &enemy, Player &me) // Make monster drop an item, recieve money. Also gives a chance to give stat-boosts.
 {
     int dropRate = 100 - enemy.getDropRate();
     int rollem = arc4random() % 100 + 1;
@@ -21,8 +21,6 @@ static void itemDrop(Monster &enemy, Player &me)
             std::string output = "You are very lucky! The " + enemy.getName() + " dropped a scroll that will permanently increase your Attack power by " + intToString(enemy.getMobLevel()) + ".";
             sayWait(output);
             me.increaseAttack(enemy.getMobLevel());
-            output = "Your new Attack level is: " + intToString(me.getAttack()) + ".";
-            sayWait(output);
         }
         
         else if (rollem > 90)
@@ -39,7 +37,7 @@ static void itemDrop(Monster &enemy, Player &me)
     me.acquireMoney(enemy.getMoney());
 }
 
-static int doAttack(Monster &enemy, Player &me, int choice)
+static int doAttack(Monster &enemy, Player &me, int choice) // Do an attack as previously chosen. Changes depending on the player's class.
 {
     int returnedDefense = 0;
     switch(me.getType())
@@ -79,10 +77,23 @@ static int doAttack(Monster &enemy, Player &me, int choice)
                     me.increaseHp(0.3*(0.8*(me.getAttack()-enemy.getDefense())));
                     break;
                 case 2:
+                {
                     sayWait2("You attack the " + enemy.getName() + " using " + me.getSkills()[choice-1] + ".");
-                    sayWait("Your ninja-like accuracy allows you to bypass the enemy's armor.");
-                    enemy.takeDamage(me.getAttack()+enemy.getDefense());
+                    int rollem = arc4random() % 100 + 1;
+                    if (rollem > 40)
+                    {
+                        sayWait("Your ninja-like accuracy allows you to bypass the enemy's armor.");
+                        enemy.takeDamage(me.getAttack()+enemy.getDefense());
+                    }
+                    
+                    else
+                    {
+                        sayWait("Your inexperience as a ninja has caused you to miss the target's vital spot.");
+                        enemy.takeDamage(0.8*me.getAttack());
+                    }
+                    
                     break;
+                }
                 case 3:
                     sayWait2("You attack the " + enemy.getName() + " using " + me.getSkills()[choice-1] + ".");
                     returnedDefense = me.getDefense() * 0.5 + 1;
@@ -102,10 +113,14 @@ static int doAttack(Monster &enemy, Player &me, int choice)
             switch(choice)
             {
                 case 1:
+                {
                     sayWait2("You attack the " + enemy.getName() + " using " + me.getSkills()[choice-1] + ".");
-                    enemy.takeDamage(me.getAttack());
-                    me.increaseHp(0.5*(0.8*(me.getAttack()-enemy.getDefense())));
+                    double multiplier = me.getMaxHp() / me.getHealth();
+                    if (multiplier > 3)
+                        multiplier = 3;
+                    enemy.takeDamage(me.getAttack()*multiplier);
                     break;
+                }
                 case 2:
                     sayWait2("You attack the " + enemy.getName() + " using " + me.getSkills()[choice-1] + ".");
                     enemy.takeDamage(1.3*me.getAttack());
@@ -134,8 +149,72 @@ static int doAttack(Monster &enemy, Player &me, int choice)
     return returnedDefense;
     }
 
-static void Combat(Monster &enemy, Player &me)
+static void EnemydoAttack(Monster &enemy, Player &me, int returnedDefense) // Make monster do a random attack. A monster's level determines whether it can or cannot do an attack of that level. If the level is not high enough, it will pick a lower-levelled attack.
 {
+    int rollem =  arc4random() % 100 + 1;
+    if (enemy.getMobLevel() >=9 && rollem >90)
+    {
+        sayWait("The "+ enemy.getName() +" attacked you with its adorableness. Aww.");
+        me.takeDamage((0.95*me.getHealth())- returnedDefense);
+    }
+    else if ( enemy.getMobLevel() >=8 && rollem >80)
+    {
+        sayWait("The "+ enemy.getName() +" attacked you with Iron claw.");
+        me.takeDamage(2.5* enemy.getAttack() - returnedDefense);
+    }
+    else if ( enemy.getMobLevel() >=7 && rollem >70)
+    {
+        sayWait("The "+ enemy.getName() +" used 'All or Nothing'!");
+        rollem = arc4random() % 100 + 1;
+        if ( rollem > 50)
+        {
+            sayWait ("The" + enemy.getName() +" got lucky!");
+            me.takeDamage(2.0* enemy.getAttack() - returnedDefense);
+            enemy.increaseHp (0.90 - enemy.getMaxHp());
+        }
+        else
+        {
+            sayWait ("The attack of the " + enemy.getName() +" failed.");
+            me.takeDamage(0.1* enemy.getAttack() - returnedDefense);
+        }
+    }
+    else if (  enemy.getMobLevel() >=6 && rollem >60)
+    {
+        sayWait("The "+ enemy.getName() +" armored up!");
+        enemy.increaseDefense (0.25 * enemy.getBaseDefense());
+    }
+    else if (  enemy.getMobLevel() >=5 && rollem >50)
+    {
+        sayWait("The " +enemy.getName() + " enters a fiery rage which increases its attack!");
+        enemy.increaseAttack (0.15 * enemy.getBaseAttack());
+    }
+    else if ( enemy.getMobLevel() >=4 && rollem >40)
+    {
+        sayWait("The " +enemy.getName() + " healed itself.");
+        enemy.increaseHp (0.1 * enemy.getMaxHp());
+    }
+    else if ( enemy.getMobLevel() >=3 && rollem >30)
+    {
+        sayWait("The " +enemy.getName() + " used Noble Sacrifice.");
+        enemy.decreaseHp(0.15*enemy.getHealth());
+        me.takeDamage(1.75*enemy.getAttack());
+    }
+    
+    else if (enemy.getMobLevel() >=2 && rollem >20)
+    {
+        sayWait("The "+ enemy.getName() +" used Sting.");
+        me.takeDamage(1.25* enemy.getAttack() - returnedDefense);
+    }
+    else
+    {
+        sayWait("The "+ enemy.getName() +" attacked you with Bite.");
+        me.takeDamage(enemy.getAttack() - returnedDefense);
+    }
+}
+
+static void Combat(Monster &enemy, Player &me) // Show current battle stats, make the player choose the next action, then perform this action and if applicable make the enemy retaliate.
+{
+    bool fighting = true;
     do
     {
         clearScreen();
@@ -151,6 +230,7 @@ static void Combat(Monster &enemy, Player &me)
             i++;
             std::cout << i << ". Use " << skill << ".\n";
         }
+        std::cout << "5. Run away.\n";
 
         std::cin >> input;
         if (std::cin.fail())
@@ -159,18 +239,33 @@ static void Combat(Monster &enemy, Player &me)
             std::cin.ignore(10000,'\n');
             sayWait("You need to enter an integer for this to work.");
         }
+        
+        else if (input == 5)
+        {
+            int rollem = arc4random() % 100 + 1;
+            if (rollem > 50)
+            {
+                fighting = false;
+                sayWait2("Got away safely!");
+            }
+            else
+            {
+                sayWait2("The enemy catches you off guard as you try to run away!");
+                EnemydoAttack(enemy, me, 0);
+            }
+            
+        }
         else
         {
             int returnedDefense = doAttack(enemy, me, input);
             if (enemy.getHealth() <= 0)
                 break;
-            sayWait("The " + enemy.getName() + " retaliates with an attack.");
-            me.takeDamage(enemy.getAttack() - returnedDefense);
+            EnemydoAttack(enemy, me, returnedDefense);
             if (me.getHealth() <= 0)
                 break;
         }
     }
-    while (enemy.getHealth() > 0 && me.getHealth() > 0);
+    while (enemy.getHealth() > 0 && me.getHealth() > 0 && fighting != false);
     
     if (me.getHealth() <= 0 && enemy.getHealth() > 0)
     {
@@ -183,6 +278,11 @@ static void Combat(Monster &enemy, Player &me)
     {
         sayWait("Congratulations. You have beaten the " + enemy.getName() + ".");
         itemDrop(enemy, me);
+    }
+    
+    else if (enemy.getHealth() > 0 && me.getHealth() > 0)
+    {
+        //got away!
     }
     
     else
