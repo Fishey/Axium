@@ -333,9 +333,9 @@ static void Combat(Monster &enemy, Player &me) // Show current battle stats, mak
                 if (enemy.getResurrection())
                 {
                     enemy.resActivate();
-                    Combat(enemy, me);
                 }
-                break;
+                else
+                    break;
             }
             EnemydoAttack(enemy, me);
             if (me.getHealth() <= 0)
@@ -343,9 +343,9 @@ static void Combat(Monster &enemy, Player &me) // Show current battle stats, mak
                 if (me.getResurrection())
                 {
                     me.resActivate();
-                    Combat(enemy, me);
                 }
-                break;
+                else
+                    break;
             }
         }
     }
