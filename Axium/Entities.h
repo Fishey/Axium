@@ -10,34 +10,42 @@
 #define __Axium__Entities__
 #include "Items.h"
 #include <algorithm>
-enum gender {male, female};
-enum type {Paladin, Ninja, Commander};
+enum gender {male, female, unknown};
+enum type {Paladin, Ninja, Commander, Reaper};
 
 class Entity
 {
     protected:
-        bool alive;
+        bool alive, bleeding, resurrect;
         gender genderType;
         std::string name;
         std::vector<Item> items;
         std::vector<std::string> skills;
-        int karma = arc4random() % 100 + 1, hitpoints, defense, attack, maxhp, money;
+        int karma = arc4random() % 100 + 1, hitpoints, defense, attack, maxhp, money, bleedStrength, bleedCounter, buffedAttack, buffedDefense, resCooldown;
     public:
         std::string getName() {return this->name;}
         std::string getGender() {if(this->genderType == male) return "male"; else if (this->genderType == female) return "female"; else return "unknown";}
         std::string getGenderText() {if(this->genderType == male) return "his"; else if (this->genderType == female) return "her"; else return "their";}
         gender getGenderType() {return this->genderType;}
+        bool getResurrection() {return this->resurrect;}
         bool getLiving() {return this->alive;}
+        bool getBleeding() {return this->bleeding;}
+        int getResCooldown() {return this->resCooldown;}
         int getKarma() {return this->karma;}
         int getMoney() {return this->money;}
         int getAttack();
         int getBaseAttack(){return this->attack;}
         int getBaseDefense(){return this->defense;}
+        int getBuffedAttack(){return this->buffedAttack;}
+        int getBuffedDefense(){return this->buffedDefense;}
         int getHealth() {return this->hitpoints;}
         int getDefense();
         int getMaxHp() {return this->maxhp;}
         std::vector<Item> getItems() {return this->items;}
         std::vector<std::string> itemList();
+        void bleed(int strength);
+        void bleedDamage();
+        void clearBleed();
         void restoreHealth();
         void setHp(int hp) {this->hitpoints = hp;}
         void setSkills();
@@ -45,14 +53,33 @@ class Entity
         void setName(std::string name) {this->name = name;}
         void setAttack(int attack) {this->attack = attack;}
         void setDefense(int defense) {this->defense = defense;}
-        void setMaxHp(int maxhp) {this->maxhp = maxhp;}
+        void setMaxHp(int maxhp) {this->maxhp = maxhp; this->hitpoints = maxhp;}
         void setGold(int money) {this->money = money;}
+        void setGender(gender gender){this->genderType = gender;}
         void takeDamage(int damage);
         void decreaseHp (int hp);
         void increaseHp (int hp);
         void increaseDefense (int defense) {this->defense += defense;}
         void increaseAttack (int attack);
+        void increaseBuffedDefense(int defense) {this->buffedDefense += defense;}
+        void increaseBuffedAttack(int attack) {this->buffedAttack += attack;}
         void increaseMaxHp (int hp) {this-> maxhp += hp; this->hitpoints += hp;}
+        void resCooldownTick() {if (this->resCooldown > 0) this->resCooldown--;}
+        void resActivate()
+        {
+            this->resurrect = false;
+            this->hitpoints = 0.3*this->maxhp;
+            if (this->name != "Reaper")
+                sayWait(this->name + "'s resurrection ability allowed them to recover " + intToString(0.3 * this->maxhp) + " health.");
+            else
+                sayWait("The " + name + "'s surroundings turn crimson as the energy it absorbed gets unleashed again, restoring " + intToString(0.3 * this->maxhp) + " of it's health.");
+        }
+        void setResurrection()
+        {
+            this->resurrect = true;
+            this->resCooldown = 3;
+        }
+        void resetBuffedStats();
         void findIncreaseItem(Item searchItem);
         bool hasItem(std::string itemName);
 
@@ -64,6 +91,7 @@ private:
     int mobLevel, dropRate;
     Item droppedItem;
 public:
+    Monster() {};
     Monster(std::string name, int hitpoints, int defense, int attack, int mobLevel, int dropRate, Item droppedItem);
 
     int getMobLevel() {return mobLevel;}

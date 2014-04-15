@@ -100,7 +100,7 @@
     std::string capitalized = this->getName();
     capitalized[0] = toupper(capitalized[0]);
     sayWait(capitalized + " lost "+ intToString(hp) + " hitpoints.");
-}
+    }
     void Entity::increaseHp (int hp) // Increases the Entity's current hitpoints by the supplied amount, up to it's max HP.
     {
         if (this->hitpoints + hp < maxhp)
@@ -138,16 +138,14 @@
 
     Monster::Monster(std::string name, int hitpoints, int defense, int attack, int mobLevel, int dropRate, Item droppedItem) // Set values for a new Monster.
     {
-        this->name = name; this->hitpoints = hitpoints; this->maxhp = this->hitpoints; this->defense = defense; this->attack = attack; this->mobLevel = mobLevel; this->droppedItem = droppedItem; this->dropRate = dropRate; this->money = arc4random() % mobLevel + 1;
+        this->name = name; this->hitpoints = hitpoints; this->maxhp = this->hitpoints; this->defense = defense; this->attack = attack; this->mobLevel = mobLevel; this->droppedItem = droppedItem; this->dropRate = dropRate; this->money = arc4random() % mobLevel + 1; bleeding = false; bleedStrength = 0; resurrect = false;
     };
 
     Player::Player() // Set initial values for a new Player.
     {
-        this->attack = 10; this->defense = 0; this->hitpoints = 100; this->maxhp = 100; this->money = 0; this->alive = true;
+        this->attack = 10; this->defense = 0; this->hitpoints = 100; this->maxhp = 100; this->money = 0; this->alive = true; this->chapter = 1; bleeding = false; bleedStrength = 0; this->genderType = unknown;
     };
 
-    
-    
     void Player::acquireItem(Item item) // Make the Player acquire an item. If they already have this item, try to increase it's quantity.
     {
         if (!hasItem(item.getName()))
@@ -206,7 +204,10 @@
         case Commander:
             this->setMaxHp(150);
             break;
-            
+        case Reaper:
+            this->setAttack(6);
+            this->setMaxHp(80);
+            break;
         default:
             break;
     }
@@ -242,6 +243,13 @@
         this->skills.push_back("Tactical Dive");
         this->skills.push_back("Opportunistic Snipe");
     }
+    else if (this->getType() == Reaper)
+    {
+        this->skills.push_back("Mending Blood of the Reaper");
+        this->skills.push_back("Lacerating Cleave");
+        this->skills.push_back("Soul Envoy's Second Wind");
+        this->skills.push_back("Blood-boiling Rage");
+    }
     else
     {
         this->skills.push_back("You");
@@ -251,8 +259,8 @@
     }
 }
 
-std::string Player::getClassName() // Returns the name of the class in string form.
-{
+    std::string Player::getClassName() // Returns the name of the class in string form.
+    {
     switch (this->classType) {
         case Paladin:
             return "Paladin";
@@ -262,7 +270,69 @@ std::string Player::getClassName() // Returns the name of the class in string fo
             break;
         case Commander:
             return "Commander";
+            break;
+        case Reaper:
+            return "Reaper";
         default:
             break;
     }
 }
+
+    void Entity::bleed(int strength)
+    {
+        this->bleedStrength = strength;
+        this->bleedCounter = 3;
+        this->bleeding = true;
+    }
+
+    void Entity::bleedDamage()
+    {
+        std::string capitalized = this->getName();
+        capitalized[0] = toupper(capitalized[0]);
+        if (bleeding && bleedCounter > 0 && bleedStrength > 0)
+        {
+            sayWait(capitalized + " took damage from Damage-Over-Time effects!");
+            if (bleedStrength < this->hitpoints)
+                this->decreaseHp(bleedStrength);
+            else this->decreaseHp(this->hitpoints);
+            bleedCounter--;
+        }
+        
+        else if (bleeding && bleedCounter > 0 && bleedStrength < 0)
+        {
+            sayWait(capitalized + " healed from Health-Over-Time effects!");
+            if (this->hitpoints + -bleedStrength < this->maxhp)
+                this->increaseHp(-bleedStrength);
+            else {
+                this->hitpoints = this->maxhp;
+                sayWait("Health of " + capitalized + " recovered to full!");
+            }
+            bleedCounter--;
+        }
+        
+        else if (bleeding && bleedCounter >= 0 && bleedStrength > 0)
+        {
+            bleeding = false;
+            sayWait(capitalized + " has been cured from Damage-Over-Time effects!");
+        }
+        
+        else if (bleeding && bleedCounter >= 0 && bleedStrength < 0)
+        {
+            bleeding = false;
+            sayWait(capitalized + " has lost their Health-Over-Time effects!");
+        }
+    }
+
+    void Entity::clearBleed()
+    {
+    this->bleeding = false;
+    this->bleedCounter = 0;
+}
+
+    void Entity::resetBuffedStats()
+    {
+        this->buffedDefense = 0;
+        this->buffedAttack = 0;
+        this->resurrect = false;
+        this->resCooldown = 0;
+    }

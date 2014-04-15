@@ -37,9 +37,8 @@ static void itemDrop(Monster &enemy, Player &me) // Make monster drop an item, r
     me.acquireMoney(enemy.getMoney());
 }
 
-static int doAttack(Monster &enemy, Player &me, int choice) // Do an attack as previously chosen. Changes depending on the player's class.
+static void doAttack(Monster &enemy, Player &me, int choice) // Do an attack as previously chosen. Changes depending on the player's class.
 {
-    int returnedDefense = 0;
     switch(me.getType())
     {
         case Paladin:
@@ -57,7 +56,8 @@ static int doAttack(Monster &enemy, Player &me, int choice) // Do an attack as p
                 case 3:
                     sayWait2("You attack the " + enemy.getName() + " using " + me.getSkills()[choice-1] + ".");
                     enemy.takeDamage(0.6*me.getAttack());
-                    returnedDefense = me.getDefense() * 0.5 + 2;
+                    if (me.getBuffedDefense() < 4)
+                        me.increaseBuffedDefense(2);
                     break;
                 case 4:
                     sayWait2("You attack the " + enemy.getName() + " using " + me.getSkills()[choice-1] + ".");
@@ -96,7 +96,7 @@ static int doAttack(Monster &enemy, Player &me, int choice) // Do an attack as p
                 }
                 case 3:
                     sayWait2("You attack the " + enemy.getName() + " using " + me.getSkills()[choice-1] + ".");
-                    returnedDefense = me.getDefense() * 0.5 + 1;
+                    me.increaseBuffedDefense(1);
                     enemy.takeDamage(me.getAttack());
                     break;
                 case 4:
@@ -128,6 +128,8 @@ static int doAttack(Monster &enemy, Player &me, int choice) // Do an attack as p
                 case 3:
                     sayWait2("You attack the " + enemy.getName() + " using " + me.getSkills()[choice-1] + ".");
                     enemy.takeDamage(0.8*me.getAttack());
+                    if (me.getBuffedDefense() < 4)
+                        me.increaseBuffedDefense(2);
                     break;
                 case 4:
                 {
@@ -144,23 +146,83 @@ static int doAttack(Monster &enemy, Player &me, int choice) // Do an attack as p
             }
 
             break;
+        case Reaper:
+            switch(choice)
+        {
+            case 1:
+                sayWait2("The " + me.getClassName() + " uses " + me.getSkills()[choice-1] + " to heal itself.");
+                me.decreaseHp(0.1*me.getMaxHp());
+                me.bleed(-0.05*me.getMaxHp());
+                break;
+            case 2:
+            {
+                int rollem = arc4random() % 100 + 1;
+                if (rollem > 40)
+                {
+                    sayWait2("The " + me.getClassName() + " uses " + me.getSkills()[choice-1] + " to rend the enemy's skin, causing it to bleed greatly.");
+                    if (!enemy.getBleeding())
+                        enemy.takeDamage(me.getAttack()+me.getBuffedAttack());
+                    else if (enemy.getBleeding())
+                    {
+                        sayWait("The " + me.getClassName() + " inflicts additional damage as it hits the already bleeding enemy!");
+                        enemy.takeDamage(1.5*me.getAttack()+me.getBuffedAttack());
+                    }
+                    enemy.bleed(0.5 * (me.getAttack()+me.getBuffedAttack()));
+                }
+                else
+                {
+                    sayWait2("The " + me.getClassName() + " uses " + me.getSkills()[choice-1] + " to try to rend the enemy's skin, but the blow doesn't manage to penetrate the armor of the enemy!\nInstead, the attack's impact causes a hefty amount of damage.");
+                    enemy.takeDamage(me.getAttack()+me.getBuffedAttack());
+                }
+                
+                break;
+            }
+            case 3:
+                if (me.getResCooldown() == 0 && !me.getResurrection())
+                {
+                    sayWait2("The " + me.getClassName() + " uses " + me.getSkills()[choice-1] + ", absorbing life all around it to ensure it's own survival.");
+                    me.setResurrection();
+                }
+                else if (me.getResCooldown() > 0 || me.getResurrection())
+                {
+                    sayWait2("The " + me.getClassName() + " tries to use " + me.getSkills()[choice-1] + ", but the surrounding area has not recovered sufficiently yet.\n In a fit of rage, it decides to attack the enemy directly instead!");
+                    enemy.takeDamage(me.getAttack()+me.getBuffedAttack());
+                    me.increaseHp(0.15*me.getMaxHp());
+                }
+                break;
+            case 4:
+                sayWait2("The " + me.getClassName() + " is overcome with " + me.getSkills()[choice-1] + ", increasing it's deadliness even moreso.");
+                if (me.getBuffedAttack() < me.getAttack())
+                    me.increaseBuffedAttack(0.2*me.getAttack());
+                else
+                {
+                    sayWait("However, it cannot contain such a high amount of power. The energy blasts out in an explosive fashion!");
+                    me.takeDamage(0.2*me.getMaxHp());
+                    enemy.takeDamage(1.5*me.getAttack()+me.getBuffedAttack());
+                    
+                }
+                break;
+            default:
+                Combat(enemy, me);
+        }
             
         }
-    return returnedDefense;
+    me.bleedDamage();
+    me.resCooldownTick();
     }
 
-static void EnemydoAttack(Monster &enemy, Player &me, int returnedDefense) // Make monster do a random attack. A monster's level determines whether it can or cannot do an attack of that level. If the level is not high enough, it will pick a lower-levelled attack.
+static void EnemydoAttack(Monster &enemy, Player &me) // Make monster do a random attack. A monster's level determines whether it can or cannot do an attack of that level. If the level is not high enough, it will pick a lower-levelled attack.
 {
-    int rollem =  arc4random() % 100 + 1;
+    int rollem =  arc4random() % enemy.getMobLevel()*10 + 1;
     if (enemy.getMobLevel() >=9 && rollem >90)
     {
         sayWait("The "+ enemy.getName() +" attacked you with its adorableness. Aww.");
-        me.takeDamage((0.95*me.getHealth())- returnedDefense);
+        me.takeDamage((0.95*me.getHealth())- me.getBuffedDefense());
     }
     else if ( enemy.getMobLevel() >=8 && rollem >80)
     {
         sayWait("The "+ enemy.getName() +" attacked you with Iron claw.");
-        me.takeDamage(2.5* enemy.getAttack() - returnedDefense);
+        me.takeDamage(2.5* enemy.getAttack() - me.getBuffedDefense());
     }
     else if ( enemy.getMobLevel() >=7 && rollem >70)
     {
@@ -169,13 +231,13 @@ static void EnemydoAttack(Monster &enemy, Player &me, int returnedDefense) // Ma
         if ( rollem > 50)
         {
             sayWait ("The" + enemy.getName() +" got lucky!");
-            me.takeDamage(2.0* enemy.getAttack() - returnedDefense);
-            enemy.increaseHp (0.90 - enemy.getMaxHp());
+            me.takeDamage(2.0* enemy.getAttack() - me.getBuffedDefense());
+            enemy.increaseHp (0.2 * enemy.getMaxHp());
         }
         else
         {
             sayWait ("The attack of the " + enemy.getName() +" failed.");
-            me.takeDamage(0.1* enemy.getAttack() - returnedDefense);
+            me.takeDamage(0.1* enemy.getAttack() - me.getBuffedDefense());
         }
     }
     else if (  enemy.getMobLevel() >=6 && rollem >60)
@@ -203,24 +265,27 @@ static void EnemydoAttack(Monster &enemy, Player &me, int returnedDefense) // Ma
     else if (enemy.getMobLevel() >=2 && rollem >20)
     {
         sayWait("The "+ enemy.getName() +" used Sting.");
-        me.takeDamage(1.25* enemy.getAttack() - returnedDefense);
+        me.takeDamage(1.25* enemy.getAttack() - me.getBuffedDefense());
+        me.bleed(0.2*enemy.getAttack());
     }
     else
     {
         sayWait("The "+ enemy.getName() +" attacked you with Bite.");
-        me.takeDamage(enemy.getAttack() - returnedDefense);
+        me.takeDamage(enemy.getAttack() - me.getBuffedDefense());
     }
+    enemy.bleedDamage();
+    enemy.resCooldownTick();
 }
 
 static void Combat(Monster &enemy, Player &me) // Show current battle stats, make the player choose the next action, then perform this action and if applicable make the enemy retaliate.
 {
     bool fighting = true;
-    do
+    while (enemy.getHealth() > 0 || me.getHealth() > 0 || fighting != false)
     {
         clearScreen();
         std::cout << "Your current hitpoints: " + intToString(me.getHealth()) + ".\n";
         std::cout << "The enemy's current hitpoints: " + intToString(enemy.getHealth()) + ".\n";
-        std::cout << "Your attack power: " + intToString(me.getAttack()) + ".\n";
+        std::cout << "Your attack power: " + intToString(me.getAttack()+me.getBuffedAttack()) + ".\n";
         std::cout << "The enemy's defense: " + intToString(enemy.getDefense()) + ".\n";
         int input;
         std::cout << "What type of attack would you like to perform?\n";
@@ -247,25 +312,46 @@ static void Combat(Monster &enemy, Player &me) // Show current battle stats, mak
             {
                 fighting = false;
                 sayWait2("Got away safely!");
+                break;
             }
             else
             {
                 sayWait2("The enemy catches you off guard as you try to run away!");
-                EnemydoAttack(enemy, me, 0);
+                EnemydoAttack(enemy, me);
+                if (me.getHealth() <= 0)
+                {
+                    break;
+                }
             }
             
         }
         else
         {
-            int returnedDefense = doAttack(enemy, me, input);
+            doAttack(enemy, me, input);
             if (enemy.getHealth() <= 0)
+            {
+                if (enemy.getResurrection())
+                {
+                    enemy.resActivate();
+                    Combat(enemy, me);
+                }
                 break;
-            EnemydoAttack(enemy, me, returnedDefense);
+            }
+            EnemydoAttack(enemy, me);
             if (me.getHealth() <= 0)
+            {
+                if (me.getResurrection())
+                {
+                    me.resActivate();
+                    Combat(enemy, me);
+                }
                 break;
+            }
         }
     }
-    while (enemy.getHealth() > 0 && me.getHealth() > 0 && fighting != false);
+    
+    
+    me.resetBuffedStats();
     
     if (me.getHealth() <= 0 && enemy.getHealth() > 0)
     {
@@ -277,6 +363,7 @@ static void Combat(Monster &enemy, Player &me) // Show current battle stats, mak
     else if (enemy.getHealth() <= 0 && me.getHealth() > 0)
     {
         sayWait("Congratulations. You have beaten the " + enemy.getName() + ".");
+        me.clearBleed();
         itemDrop(enemy, me);
     }
     
